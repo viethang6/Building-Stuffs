@@ -1,0 +1,381 @@
+// MongoDB Playground
+// To disable this template go to Settings | MongoDB | Use Default Template For Playground.
+// Make sure you are connected to enable completions and to be able to run a playground.
+// Use Ctrl+Space inside a snippet or a string literal to trigger completions.
+
+// Select the database to use.
+use('userdb');
+
+// The drop() command destroys all data from a collection.
+// Make sure you run it against the correct database and collection.
+db.customer.drop();
+db.customer_order.drop();
+db.order.drop();
+
+// Create schema validation for customers with orders:
+
+db.createCollection("customer_order", { validator: {
+  $jsonSchema: {
+    bsonType: "object",
+    required: [ "number"], 
+    properties: {
+      number: {
+        bsonType: "int",
+        description: "customer number"
+      }, 
+      first_name: {
+        bsonType: "string",
+        description: "customer first name"
+      }, 
+      last_name: {
+        bsonType: "string",
+        description: "customer last name"
+      },
+      street: {
+        bsonType: "string",
+        description: "customer street address"
+      }, 
+      city: {
+        bsonType: "string",
+        description: "customer city"},
+      state: {
+        bsonType: "string",
+        description: "customer state"}, 
+      zip: {
+        bsonType: "int",
+        description: "customer zip code"},  
+      phone: {
+        bsonType: "int",
+        description: "customer phone number"}, 
+      order: {
+        bsonType: ["array"],
+        description: "customer orders"},
+        items: {
+            bsonType: ["object"],
+            required: ["order_numb"],
+            uniqueItems: true,
+            properties: {
+                order_numb: {
+                    bsonType: "int",
+                    description: "order number"
+                }, 
+                customer_numb: {
+                    bsonType: "int",
+                    description: "customer number"
+                }, 
+                order_date: {
+                    bsonType: "date",
+                    description: "date of order" 
+                }, 
+                credit_card_numb: {
+                    bsonType: "int",
+                    description: "credit card number" 
+                }, 
+                credit_card_exp_date: {
+                    bsonType: "date",
+                    description: "credit card expiration date"
+                }, 
+                order_complete: {
+                    bsonType: "bool",
+                    description: "order completed or not" 
+                }, 
+                pickup_or_ship: {
+                    enum: ["Pickup","Ship"],
+                    description: "order completed or not"}, }}
+
+} }
+} } )
+
+// Alternative: create customer and order table and link them together
+
+db.createCollection('customer', { 
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["number"], 
+            properties: {
+                number: {
+                    bsonType: "int",
+                    description: "customer number"
+                }, 
+                first_name: {
+                    bsonType: "string",
+                    description: "customer first name"
+                }, 
+                last_name: {
+                    bsonType: "string",
+                    description: "customer last name"
+                },
+                street: {
+                    bsonType: "string",
+                    description: "customer street address"
+                }, 
+                city: {
+                    bsonType: "string",
+                    description: "customer city"},
+                state: {
+                    bsonType: "string",
+                    description: "customer state"}, 
+                zip: {
+                    bsonType: "int",
+                    description: "customer zip code"},  
+                phone: {
+                    bsonType: "int",
+                    description: "customer phone number"},}}}})
+
+db.createCollection('order', {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            properties: {
+                order_numb: {
+                    bsonType: "int",
+                    description: "order number"
+                }, 
+                customer_numb: {
+                    bsonType: "int",
+                    description: "customer number"
+                }, 
+                order_date: {
+                    bsonType: "date",
+                    description: "date of order" 
+                }, 
+                credit_card_numb: {
+                    bsonType: "int",
+                    description: "credit card number" 
+                }, 
+                credit_card_exp_date: {
+                    bsonType: "string",
+                    description: "credit card expiration date"
+                }, 
+                order_complete: {
+                    bsonType: "bool",
+                    description: "order completed or not" 
+                }, 
+                pickup_or_ship: {
+                    enum: ["Pickup","Ship"],
+                    description: "order completed or not"}, }} } } )
+
+// insert 2 customers who has 3 orders each
+db.customer.insertMany(
+    [
+        {   _id: 1,
+            number: 1,
+            first_name: 'Tracy',
+            last_name: 'Le',
+            street: '1659 Powell Street',
+            city: 'San Francisco',
+            state: 'California',
+            zip: 94133,            
+        },
+        {   _id: 2,
+            number: 2,
+            first_name: 'Ha',
+            last_name: 'Nguyen',
+            street: '5 Sciennes Street',
+            city: 'Edinburgh',
+            state: 'Scotland',
+            zip: 99911,   
+        } 
+               
+]) 
+
+db.order.insertMany(
+        [
+            {
+                order_numb: 01,
+                customer_numb: 1,
+                order_date: new Date('2020-09-02'),
+                credit_card_numb: 42425,
+                credit_card_exp_date: '09/22',
+                order_complete: false,
+                pickup_or_ship: 'Ship',
+            },
+            {
+                order_numb: 02,
+                customer_numb: 1,
+                order_date: new Date('2020-09-02'),
+                credit_card_numb: 427236,
+                credit_card_exp_date: '09/22',
+                order_complete: true,
+                pickup_or_ship: 'Ship',
+            },
+            {
+                order_numb: 03,
+                customer_numb: 2,
+                order_date: new Date('2020-09-02'),
+                credit_card_numb: 9980,
+                credit_card_exp_date: '09/22',
+                order_complete: true,
+                pickup_or_ship: 'Ship',
+            },
+            {
+                order_numb: 04,
+                customer_numb: 2,
+                order_date: new Date('2020-09-02'),
+                credit_card_numb: 2323,
+                credit_card_exp_date: '09/22',
+                order_complete: false,
+                pickup_or_ship: 'Ship',
+            },
+            {
+                order_numb: 05,
+                customer_numb: 6,
+                order_date: new Date('2020-09-02'),
+                credit_card_numb: 68687,
+                credit_card_exp_date: '09/22',
+                order_complete: true,
+                pickup_or_ship: 'Pickup',
+            },
+            {
+                order_numb: 02,
+                customer_numb: 1,
+                order_date: new Date('2020-09-02'),
+                credit_card_numb: 57656,
+                credit_card_exp_date: '09/22',
+                order_complete: true,
+                pickup_or_ship: 'Pickup',
+            },
+        ])
+
+
+db.customer_order.insertMany(
+    [
+        {   _id: 1,
+            number: 1,
+            first_name: 'Tracy',
+            last_name: 'Le',
+            street: '1659 Powell Street',
+            city: 'San Francisco',
+            state: 'California',
+            zip: 94133, 
+            order: [
+                {
+                    order_numb: 01,
+                    customer_numb: 1,
+                    order_date: Date('2020-09-02'),
+                },
+                {
+                    order_numb: 02,
+                    customer_numb: 1,
+                    order_date: Date('2021-09-03'),
+                },
+                {
+                    order_numb: 03,
+                    customer_numb: 1,
+                    order_date: Date('2022-09-04'),
+                },
+            ]
+            
+        },
+        {   _id: 2,
+            number: 2,
+            first_name: 'Ha',
+            last_name: 'Nguyen',
+            street: '5 Sciennes Street',
+            city: 'Edinburgh',
+            state: 'Scotland',
+            zip: 99911, 
+            order: [
+                {
+                    order_numb: 04,
+                    customer_numb: 2,
+                    order_date: Date('2020-09-02'),
+                },
+                {
+                    order_numb: 05,
+                    customer_numb: 2,
+                    order_date: Date('2021-09-03'),
+                },
+                {
+                    order_numb: 06,
+                    customer_numb: 2,
+                    order_date: Date('2022-09-04'),
+                },
+            ]
+            
+        } 
+               
+]) 
+
+// Join the two collections together
+db.customer.aggregate( [
+    {
+        $lookup: {
+          from: 'order',
+          localField: 'number',
+          foreignField: 'customer_numb',
+          as: 'orders'
+        }
+    }
+]);
+
+// QUESTION 2: STUDENT
+
+use('userdb');
+
+// remove if collection exists
+db.student.drop();
+
+// create collection
+db.createCollection('student', {
+  validator: {
+    $jsonSchema: {
+      bsonType: 'object',
+      required: ['name'],
+      properties: {
+        name: {
+          bsonType: 'string'},
+        home_address: {
+          bsonType: 'object',
+          properties: {
+            street: { bsonType: 'string' },
+            city: { bsonType: 'string' },
+            zip: { bsonType: 'int' } 
+          }
+        },
+        phone_number: {
+            bsonType: 'int',
+        }
+      }
+    }
+  }
+});
+
+// Insert 10 students:
+
+var street = ['369 Princess Street', '369 Princess Street', '424 Earling Street', 'La Champange Avenue']
+var city = ['New York City', 'San Francisco', 'Paris', 'Edinburgh']
+var zip = [94133, 10111, 28484, 42423, 4324]
+var name = ['Elsa', 'Rachel', 'Amanda', 'David', 'Iris', 'Ola', 'Menna', 'Jesscia', 'Connie', 'Taylor']
+
+
+for (i = 1; i <= 10; i=i+1){ 
+    city_st = Math.floor(Math.random()*4)
+  db.student.insertOne({
+      name: name[i-1],
+      home_address: {
+          street: street[Math.floor(Math.random()*4)],
+          city: city[city_st],
+          zip: zip[Math.floor(Math.random()*5)]
+      },
+      phone: Math.floor(Math.random()*(9999999999 - 1000000000 + 1) + 1000000000)
+  })
+}
+
+
+//I'd recommend running index on student name, phone number and zipcode. 
+
+// Create index:
+db.student.createIndex( { "name": 1}, { name: "name_index" } )
+db.student.createIndex( { "phone_number": 1}, { name: "phone_index" } )
+db.student.createIndex( { "home_address.zip": 1}, { name: "zip_index" } )
+
+// Run search queries:
+
+db.student.find( { name: "Rachel"} )
+db.student.find( { zip: "94133"} )
+
+// Proof that index is running:
+
+db.student.aggregate( [ { $indexStats: { } } ] ) 
